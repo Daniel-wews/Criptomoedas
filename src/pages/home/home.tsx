@@ -11,9 +11,13 @@ interface CoinsProps{
     supply:string;
     maxSupply:string;
     marketCapUsd:string;
+    changePercent24Hr:string;
     volumeUsd24Hr:string;
     vwap24Hr:string;
     explorer:string;
+    formatedPrice?: string;
+    formatedMarket?: string;
+    formatedVolume?: string;
 }
 
 interface Dataprops{
@@ -37,18 +41,27 @@ export default function Home (){
 
             const price = Intl.NumberFormat("en-US", {
                 style:"currency",
-                currency:"USD"
+                currency:"USD",
+            })
+
+            const priceCompact = Intl.NumberFormat("en-US", {
+                style:"currency",
+                currency:"USD",
+                notation:'compact'
             })
 
             const formatedResult = coinsData.map((item) =>{
                 const formated = {
                     ...item,
-                    formatedPrice: price.format(Number(item.priceUsd))
+                    formatedPrice: price.format(Number(item.priceUsd)),
+                    formatedMarket: priceCompact.format(Number(item.marketCapUsd)),
+                    formatedVolume: priceCompact.format(Number(item.volumeUsd24Hr))
                 }
                 return formated;
             })
 
-            console.log(formatedResult)
+            // console.log(formatedResult)
+            setCoins(formatedResult)
         })
     }
 
@@ -88,31 +101,35 @@ export default function Home (){
                 </thead>
 
                 <tbody id='tbody'>
-                    <tr className={styles.tr}>
+                    {coins.length > 0 && coins.map((item) => (
+                        <tr className={styles.tr} key={item.id}>
                         <td className={styles.tdLabel} data-Label='Moeda'>
                             <div className={styles.name}>
-                            <Link to='/detail/bitcon'>
-                            <span>Bitcoin</span> | BTC
+                                <img className={styles.logo}
+                                 src={`https://assets.coincap.io/assets/icons/${item.symbol.toLocaleLowerCase()}@2x.png`} alt="logo Cripto" />
+                            <Link to={`/detail/${item.id}`}>
+                            <span>{item.name}</span> | {item.symbol}
                             </Link>
                             </div>
                         </td>
 
                         <td className={styles.tdLabel} data-label='valor mercado'>
-                            1T
+                            {item.formatedMarket}
                         </td>
 
                         <td className={styles.tdLabel} data-label='preço'>
-                            8.000
+                            {item.formatedPrice}
                         </td>
 
                         <td className={styles.tdLabel} data-label='Volume'>
-                            2B
+                            {item.formatedVolume}
                         </td>
 
-                        <td className={styles.tdProfit} data-label='Mudança 24h'>
-                            <span>1.20</span>
+                        <td className={Number(item.changePercent24Hr) > 0 ? styles.tdProfit : styles.tdLoss} data-label='Mudança 24h'>
+                            <span>{Number(item.changePercent24Hr).toFixed(3)}</span>
                         </td>
                     </tr>
+                    ))}
                 </tbody>
             </table>
 
