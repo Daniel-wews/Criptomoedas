@@ -3,7 +3,7 @@ import styles from './home.module.css'
 import { BsSearch } from 'react-icons/bs'
 import { Link, useNavigate } from 'react-router-dom'
 
-interface CoinsProps{
+export interface CoinsProps{
     id:string;
     name:string;
     symbol:string;
@@ -25,16 +25,17 @@ interface Dataprops{
 }
 export default function Home (){
     const [input,setInput] = useState('')
-    const [coins,setCoins] = useState<CoinsProps[]>([])
+    const [coins,setCoins] = useState<CoinsProps[]>([]);
+    const [offset, setOffset] = useState(0);
 
     const navigate = useNavigate()
 
     useEffect(()=>{
         getData()
-    },[])
+    },[offset])
 
     async function getData(){
-        fetch("https://api.coincap.io/v2/assets?limit=10&offset=0")
+        fetch(`https://api.coincap.io/v2/assets?limit=10&offset=${offset}`)
         .then(response => response.json())
         .then((data:Dataprops) => {
             const coinsData = data.data
@@ -61,7 +62,9 @@ export default function Home (){
             })
 
             // console.log(formatedResult)
-            setCoins(formatedResult)
+            const listCoins = [...coins, ...formatedResult]
+
+            setCoins(listCoins);
         })
     }
 
@@ -72,7 +75,12 @@ export default function Home (){
     }
 
     function handleGetMore(){
-        alert("teste")
+        if(offset === 0) {
+            setOffset(10)
+            return;
+        }
+
+        setOffset(offset)
     }
     
     return(
